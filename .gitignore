@@ -1,0 +1,21 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs and runtime output
+logs/
+*.log
+*.out
+*.err
+
+# Accidental tool artifacts
+=*
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Editor files
+.vscode/
+*.code-workspace
