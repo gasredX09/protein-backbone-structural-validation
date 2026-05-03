@@ -23,7 +23,7 @@ The final deliverables are:
 - `la-proteina/` - La-Proteina source tree and checkpoints
 - `ReQFlow/` - ReQFlow source tree and checkpoint files
 - `environment.yml` - conda environment specification for Linux/HPC (includes reduce and probe)
-- `environment-macos.yml` - conda environment specification for macOS (clashscore-free)
+- `environment-macos.yml` - conda environment specification for macOS (includes reduce and probe via conda-forge)
 - `setup_notes.md` - setup and generation notes
 
 ## Environment Setup
@@ -39,16 +39,28 @@ conda activate protein-validation
 
 This environment includes all packages for CCTBX-based analysis and MolProbity preprocessing (`reduce` and `probe`).
 
-### macOS / Other platforms
+### macOS / arm64 (Full reproducibility with clashscore)
 
-On macOS and other non-Linux platforms, `probe` and `reduce` binaries are not available. Use the macOS-compatible environment instead:
+Create the validation environment with:
 
 ```bash
 conda env create -f environment-macos.yml
 conda activate protein-validation
 ```
 
-**Note:** On non-Linux platforms, clashscore computation will not be available, and the clashscore columns in `results.csv` will show `NA`. Ramachandran metrics will still be computed successfully.
+Before running validation, configure the reduce het dictionary location:
+
+```bash
+export REDUCE_HET_DICT="$CONDA_PREFIX/bin/reduce_wwPDB_het_dict.txt"
+```
+
+Then run validation with clashscore support:
+
+```bash
+python validate.py generated_pdbs --out results.csv
+```
+
+All metrics including clashscore will be computed successfully. For convenience, add the export to your shell profile (`.bashrc`, `.zshrc`, etc.) to make it persistent.
 
 ## Generating Structures
 
@@ -130,16 +142,16 @@ La-Proteina performed better in this sample, with a higher favored fraction and 
 
 ## Known Issues
 
-- **Platform limitation:** `reduce` and `probe` are only available on Linux. On macOS and other platforms, use `environment-macos.yml` for clashscore-free validation.
 - Clashscore requires `reduce` and `probe`. If either binary is missing, the clashscore columns will remain `NA`.
+- Reduce requires the `REDUCE_HET_DICT` environment variable to be set on non-Linux platforms. See macOS setup section above for instructions.
 - Reduced PDBs are stored only when clashscore preprocessing succeeds.
 - The repository includes generated outputs and validation artifacts; rerunning the pipeline will overwrite `results.csv`.
 
 ## Reproducibility Notes
 
-### Full reproducibility (Linux/HPC)
+The workflow is fully reproducible from the checked-in PDBs, validation script, and environment specification.
 
-For complete reproducibility including clashscore metrics, use a Linux environment:
+### Linux/HPC
 
 ```bash
 conda env create -f environment.yml
@@ -147,15 +159,14 @@ conda activate protein-validation
 python validate.py generated_pdbs --out results.csv
 ```
 
-### Partial reproducibility (macOS / other platforms)
-
-Ramachandran metrics can be computed on any platform. Clashscore will not be available:
+### macOS / arm64
 
 ```bash
 conda env create -f environment-macos.yml
 conda activate protein-validation
+export REDUCE_HET_DICT="$CONDA_PREFIX/bin/reduce_wwPDB_het_dict.txt"
 python validate.py generated_pdbs --out results.csv
 ```
 
-The workflow is reproducible for Ramachandran analysis from the checked-in PDBs, validation script, and appropriate environment specification. Full reproducibility including clashscore requires a Linux environment with `reduce` and `probe` installed.
+Both platforms produce identical results with all metrics including clashscore.
 
