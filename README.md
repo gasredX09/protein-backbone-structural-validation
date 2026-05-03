@@ -4,7 +4,7 @@
 
 This repository provides a reproducible pipeline for validating generated protein backbones using CCTBX-based structural analysis. The validation workflow analyzes 100 protein structures (50 from La-Proteina and 50 from ReQFlow) and produces:
 
-- `validate.py` - validation script with CCTBX Ramachandran analysis and optional MolProbity clashscore
+- `validate.py` - validation script (CCTBX Ramachandran + optional MolProbity clashscore)
 - `results.csv` - per-structure quality metrics (Ramachandran + clashscore)
 - `generated_pdbs/` - precomputed input structures (length ~200 backbones)
 - `reduced_pdbs/` - hydrogen-preprocessed structures (when clashscore succeeds)
@@ -117,7 +117,7 @@ Each set contains approximately 200-residue backbones with filenames:
 - `laproteina_001.pdb` through `laproteina_050.pdb`
 - `reqflow_001.pdb` through `reqflow_050.pdb`
 
-(Note: Structures are parsed as 198 residues after CCTBX analysis due to standard PDB residue numbering.)
+(Note: Structures are parsed as 198 residues by CCTBX. This reflects terminal residue handling in the PDB representation rather than a true change in backbone length.)
 
 ## Running Validation
 
@@ -138,12 +138,13 @@ Validation performs the following steps for each structure:
 1. **Parse structure:** Read PDB file with CCTBX
 2. **Ramachandran analysis:** Compute favored/allowed/outlier counts and fractions using CCTBX phi/psi geometry
 3. **Optional clashscore (if reduce + probe available):**
+   - Clashscore requires explicit hydrogen placement; `reduce` adds hydrogens and optimizes orientations (for example Asn/Gln/His flips), while `probe` computes steric overlaps.
    - Strip hydrogens: `reduce -quiet -trim -allalt input.pdb > trimmed.pdb`
    - Rebuild hydrogens: `reduce -quiet -build trimmed.pdb > reduced.pdb`
    - Compute clashscore on reduced structure
 4. **Output:** Write one row per structure to `results.csv`
 
-The validation script is robust to missing binaries and continues processing even if clashscore fails for individual structures.
+The validation script logs errors per structure and continues execution, so a single malformed PDB does not interrupt the full validation run.
 
 ## Output Format
 
@@ -188,12 +189,12 @@ Method-level Ramachandran summary:
 | La-Proteina | 0.9944 | 0.9950 | 0.0002 | 0.0000 | 0.00 | 50 |
 | ReQFlow | 0.9781 | 0.9899 | 0.0046 | 0.0000 | 0.00 | 50 |
 
-La-Proteina shows higher-quality Ramachandran metrics in this sample compared to ReQFlow, with ~2% higher favored fraction and ~0.5% lower outlier fraction.
+La-Proteina shows higher-quality Ramachandran metrics in this sample compared to ReQFlow, with ~2% higher favored fraction and ~0.5% lower outlier fraction. Both methods produce largely physically plausible backbones (>97% favored on average), but ReQFlow shows more variability and more outliers.
 
 ## Known Issues & Quirks
 
 - **Clashscore availability:** Requires both `reduce` and `probe` binaries. If either is missing, clashscore columns show `NA`.
-- **reduce het dictionary:** Must set `REDUCE_HET_DICT` environment variable on macOS; Linux conda paths handle this automatically. See macOS build instructions above.
+- **reduce het dictionary:** On some systems, `reduce` requires the `REDUCE_HET_DICT` environment variable. This is typically configured automatically in conda-based Linux environments, but may require manual configuration on macOS.
 - **molprobity.reduce symlink:** The clashscore module internally expects `molprobity.reduce`; create a symlink if building from source.
 - **reduce exit codes:** May exit with code 255 even when output is valid; script ignores exit code if output file exists.
 - **Hydrogen preprocessing:** Reduced PDBs (with added hydrogens) are stored only when clashscore preprocessing succeeds.
@@ -254,6 +255,8 @@ which probe && probe -version
 Both platforms reproduce **Ramachandran metrics identically**. Clashscore is available when `reduce` and `probe` are correctly installed:
 - **Linux/HPC:** via conda automatically
 - **macOS:** via manual source build (see instructions above)
+
+The input directory is expected to contain 100 PDB files, 50 per method.
 
 The workflow is reproducible from:
 - Checked-in PDB structures in `generated_pdbs/`
