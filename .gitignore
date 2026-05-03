@@ -1,21 +1,42 @@
-# Python cache
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Logs and runtime output
-logs/
-*.log
-*.out
-*.err
-
-# Accidental tool artifacts
-=*
-
-# Notebook checkpoints
-.ipynb_checkpoints/
-
-# Editor files
+# IDEs
 .vscode/
-*.code-workspace
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+submission/
+la-proteina/
+ReQFlow/
+reduced_pdbs/
+slurm/
+logs/
+*.csv.bak
+test_*.csv
+=*.py
