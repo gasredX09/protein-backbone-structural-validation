@@ -22,10 +22,13 @@ The final deliverables are:
 - `reduced_pdbs/` - hydrogen-added structures saved during clashscore preprocessing
 - `la-proteina/` - La-Proteina source tree and checkpoints
 - `ReQFlow/` - ReQFlow source tree and checkpoint files
-- `environment.yml` - conda environment specification for validation
+- `environment.yml` - conda environment specification for Linux/HPC (includes reduce and probe)
+- `environment-macos.yml` - conda environment specification for macOS (clashscore-free)
 - `setup_notes.md` - setup and generation notes
 
 ## Environment Setup
+
+### Linux/HPC (Recommended for full reproducibility)
 
 Create the validation environment with:
 
@@ -34,7 +37,18 @@ conda env create -f environment.yml
 conda activate protein-validation
 ```
 
-This environment is intended for validation only and includes the packages needed to run CCTBX-based analysis and MolProbity preprocessing.
+This environment includes all packages for CCTBX-based analysis and MolProbity preprocessing (`reduce` and `probe`).
+
+### macOS / Other platforms
+
+On macOS and other non-Linux platforms, `probe` and `reduce` binaries are not available. Use the macOS-compatible environment instead:
+
+```bash
+conda env create -f environment-macos.yml
+conda activate protein-validation
+```
+
+**Note:** On non-Linux platforms, clashscore computation will not be available, and the clashscore columns in `results.csv` will show `NA`. Ramachandran metrics will still be computed successfully.
 
 ## Generating Structures
 
@@ -116,24 +130,32 @@ La-Proteina performed better in this sample, with a higher favored fraction and 
 
 ## Known Issues
 
+- **Platform limitation:** `reduce` and `probe` are only available on Linux. On macOS and other platforms, use `environment-macos.yml` for clashscore-free validation.
 - Clashscore requires `reduce` and `probe`. If either binary is missing, the clashscore columns will remain `NA`.
 - Reduced PDBs are stored only when clashscore preprocessing succeeds.
 - The repository includes generated outputs and validation artifacts; rerunning the pipeline will overwrite `results.csv`.
 
 ## Reproducibility Notes
 
-The exact validation command is:
+### Full reproducibility (Linux/HPC)
 
-```bash
-python validate.py generated_pdbs --out results.csv
-```
-
-Recommended environment setup commands are:
+For complete reproducibility including clashscore metrics, use a Linux environment:
 
 ```bash
 conda env create -f environment.yml
 conda activate protein-validation
+python validate.py generated_pdbs --out results.csv
 ```
 
-The workflow is reproducible from the checked-in PDBs, validation script, and environment specification.
+### Partial reproducibility (macOS / other platforms)
+
+Ramachandran metrics can be computed on any platform. Clashscore will not be available:
+
+```bash
+conda env create -f environment-macos.yml
+conda activate protein-validation
+python validate.py generated_pdbs --out results.csv
+```
+
+The workflow is reproducible for Ramachandran analysis from the checked-in PDBs, validation script, and appropriate environment specification. Full reproducibility including clashscore requires a Linux environment with `reduce` and `probe` installed.
 

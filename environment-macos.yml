@@ -1,0 +1,15 @@
+name: protein-validation
+channels:
+  - conda-forge
+  - bioconda
+  - speleo3
+dependencies:
+  - python=3.10
+  - cctbx-base
+  - pandas
+  - numpy
+  - matplotlib
+  - tqdm
+  - reportlab
+  - biopython
+  - pip
