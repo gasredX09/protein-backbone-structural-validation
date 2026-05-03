@@ -197,6 +197,11 @@ def validate_directory(input_dir, output_csv, verbose=False):
     """Validate all PDB files in a directory."""
     pdb_files = list(find_pdb_files(input_dir))
 
+    reduced_root = Path("reduced_pdbs")
+    reduced_root.mkdir(parents=True, exist_ok=True)
+    for method in ("laproteina", "reqflow"):
+        (reduced_root / method).mkdir(parents=True, exist_ok=True)
+
     if not pdb_files:
         print(f"No PDB files found in {input_dir}")
         return
