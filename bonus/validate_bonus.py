@@ -101,7 +101,8 @@ def _run_clashscore(reduced_pdb):
         text=True,
     )
 
-    n_clashes = _parse_probe_summary(probe_run.stdout)
+    summary_text = probe_run.stdout
+    n_clashes = _parse_probe_summary(summary_text)
     if n_clashes is None:
         return "NA", "NA", "could not parse probe summary"
 
@@ -182,8 +183,9 @@ def _write_method_summary(results, summary_out):
         for method in sorted(by_method):
             rows = by_method[method]
             successful = [r for r in rows if not r.get("error")]
-            favored_vals = [_to_float(r.get("rama_favored_frac")) for r in successful]
-            outlier_vals = [_to_float(r.get("rama_outlier_frac")) for r in successful]
+            # rama_* now store fractions directly (per new schema)
+            favored_vals = [_to_float(r.get("rama_favored")) for r in successful]
+            outlier_vals = [_to_float(r.get("rama_outlier")) for r in successful]
             clash_vals = [_to_float(r.get("clashscore")) for r in successful]
 
             favored_vals = [v for v in favored_vals if v is not None]
@@ -222,14 +224,12 @@ def _write_method_summary(results, summary_out):
 def validate_pdb(pdb_path, skip_clashscore=False, reduced_root=None, log_file=None):
     result = {
         "filename": os.path.basename(pdb_path),
-        "method": _infer_method(pdb_path),
+        "method": _infer_method(pdb_path),  # Needed for method-level summaries
         "n_residues": None,
+        # Per assignment schema: rama_* store fractions directly
         "rama_favored": None,
         "rama_allowed": None,
         "rama_outlier": None,
-        "rama_favored_frac": None,
-        "rama_allowed_frac": None,
-        "rama_outlier_frac": None,
         "clashscore": "NA",
         "n_clashes": "NA",
         "clashscore_error": "",
@@ -273,13 +273,15 @@ def validate_pdb(pdb_path, skip_clashscore=False, reduced_root=None, log_file=No
             result["clashscore_error"] = "skipped by --skip-clashscore"
 
         result["n_residues"] = rama.n_total
-        result["rama_favored"] = rama.n_favored
-        result["rama_allowed"] = rama.n_allowed
-        result["rama_outlier"] = rama.n_outliers
+        # Per assignment schema: store fractions directly in rama_* columns
         if rama.n_total:
-            result["rama_favored_frac"] = round(rama.n_favored / rama.n_total, 4)
-            result["rama_allowed_frac"] = round(rama.n_allowed / rama.n_total, 4)
-            result["rama_outlier_frac"] = round(rama.n_outliers / rama.n_total, 4)
+            result["rama_favored"] = round(rama.n_favored / rama.n_total, 4)
+            result["rama_allowed"] = round(rama.n_allowed / rama.n_total, 4)
+            result["rama_outlier"] = round(rama.n_outliers / rama.n_total, 4)
+        else:
+            result["rama_favored"] = None
+            result["rama_allowed"] = None
+            result["rama_outlier"] = None
 
     except Exception as exc:
         result["error"] = str(exc)
@@ -343,14 +345,10 @@ def validate_directory(
 
     fieldnames = [
         "filename",
-        "method",
         "n_residues",
         "rama_favored",
         "rama_allowed",
         "rama_outlier",
-        "rama_favored_frac",
-        "rama_allowed_frac",
-        "rama_outlier_frac",
         "clashscore",
         "n_clashes",
         "clashscore_error",
@@ -360,7 +358,9 @@ def validate_directory(
     with open(output_csv, "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(results)
+        # Only write fields that are in fieldnames (filters out 'method' which is for internal summaries)
+        filtered_results = [{k: v for k, v in r.items() if k in fieldnames} for r in results]
+        writer.writerows(filtered_results)
 
     if summary_out:
         _write_method_summary(results, summary_out)
