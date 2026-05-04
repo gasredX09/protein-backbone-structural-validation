@@ -117,14 +117,11 @@ def validate_pdb(pdb_path):
     """Validate a single PDB file."""
     result = {
         "filename": os.path.basename(pdb_path),
-        "method": _infer_method(pdb_path),
         "n_residues": None,
+        # Per-assignment: rama_* should be fractions (favored/allowed/outlier)
         "rama_favored": None,
         "rama_allowed": None,
         "rama_outlier": None,
-        "rama_favored_frac": None,
-        "rama_allowed_frac": None,
-        "rama_outlier_frac": None,
         "clashscore": "NA",
         "n_clashes": "NA",
         "clashscore_error": "",
@@ -132,8 +129,8 @@ def validate_pdb(pdb_path):
     }
 
     try:
-        # Determine output directory for reduced PDB
-        method = result["method"]
+        # Determine output directory for reduced PDB (preserve reduced files per-method)
+        method = _infer_method(pdb_path)
         reduced_output_dir = None
         if method in ("laproteina", "reqflow"):
             reduced_output_dir = Path("reduced_pdbs") / method
@@ -148,13 +145,15 @@ def validate_pdb(pdb_path):
             rama = ramalyze.ramalyze(hierarchy)
 
             result["n_residues"] = rama.n_total
-            result["rama_favored"] = rama.n_favored
-            result["rama_allowed"] = rama.n_allowed
-            result["rama_outlier"] = rama.n_outliers
+            # Per assignment schema: store fractions directly in rama_* columns
             if rama.n_total:
-                result["rama_favored_frac"] = round(rama.n_favored / rama.n_total, 4)
-                result["rama_allowed_frac"] = round(rama.n_allowed / rama.n_total, 4)
-                result["rama_outlier_frac"] = round(rama.n_outliers / rama.n_total, 4)
+                result["rama_favored"] = round(rama.n_favored / rama.n_total, 4)
+                result["rama_allowed"] = round(rama.n_allowed / rama.n_total, 4)
+                result["rama_outlier"] = round(rama.n_outliers / rama.n_total, 4)
+            else:
+                result["rama_favored"] = None
+                result["rama_allowed"] = None
+                result["rama_outlier"] = None
 
             if reduced_path is not None:
                 # Save reduced PDB to reduced_pdbs directory
@@ -230,16 +229,13 @@ def validate_directory(input_dir, output_csv, verbose=False):
         else:
             clashscore_attempted += 1
 
+    # Output columns per assignment: rama_* are fractions
     fieldnames = [
         "filename",
-        "method",
         "n_residues",
         "rama_favored",
         "rama_allowed",
         "rama_outlier",
-        "rama_favored_frac",
-        "rama_allowed_frac",
-        "rama_outlier_frac",
         "clashscore",
         "n_clashes",
         "clashscore_error",
