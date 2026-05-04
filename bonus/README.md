@@ -152,8 +152,8 @@ bonus/
 **summary_by_method.csv:**
 ```
 method,n_total,n_successful,mean_rama_favored,median_rama_favored,mean_rama_outlier,median_rama_outlier,mean_clashscore
-laproteina,50,50,0.9944,0.9949,0.0002,0.0,0.0
-reqflow,50,50,0.9781,0.9798,0.0046,0.0051,0.0
+laproteina,50,50,0.9944,0.9949,0.0002,0.0,NA
+reqflow,50,50,0.9781,0.9798,0.0046,0.0051,NA
 ```
 
 **logs/validation_errors.txt (if any errors occur):**
