@@ -80,6 +80,7 @@ def _run_reduce_pipeline(input_pdb, work_dir):
 
 
 def _parse_probe_summary(summary_text):
+    # Probe emits a summary line that includes the raw clash count.
     n_clashes = None
     for line in summary_text.splitlines():
         if line.lstrip().startswith(":SUM"):
@@ -91,6 +92,7 @@ def _parse_probe_summary(summary_text):
 
 
 def _run_clashscore(reduced_pdb):
+    # Keep the bonus workflow aligned with the working direct Probe path.
     if not PROBE_BIN:
         return "NA", "NA", "probe not found"
 
@@ -125,6 +127,8 @@ def _infer_method(pdb_path):
 
 def _find_pdb_files(input_dir, recursive=False):
     input_path = Path(input_dir)
+    # Recursive search is optional here because the bonus workflow can also
+    # be pointed at a flat directory of PDBs.
     if recursive:
         pdb_iter = input_path.rglob("*.pdb")
     else:

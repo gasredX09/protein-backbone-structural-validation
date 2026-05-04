@@ -90,6 +90,8 @@ def _parse_probe_summary(summary_text):
 
 
 def _run_clashscore(reduced_pdb):
+    # Use Reduce to prepare the structure, then Probe to count clashes.
+    # This matches the working validation path used elsewhere in the repo.
     if not PROBE_BIN:
         return "NA", "NA", "probe not found"
 
