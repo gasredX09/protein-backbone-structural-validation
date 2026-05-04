@@ -42,18 +42,9 @@ This environment includes all packages for CCTBX-based analysis and MolProbity p
 
 Ramachandran metrics work out of the box. Clashscore requires manual installation of `reduce` and `probe`.
 
-#### Option A: Quick setup (if conda packages available)
+#### Build reduce and probe from source
 
-```bash
-conda env create -f environment-macos.yml
-conda activate protein-validation
-export REDUCE_HET_DICT="$CONDA_PREFIX/bin/reduce_wwPDB_het_dict.txt"
-python validate.py generated_pdbs --out results.csv
-```
-
-#### Option B: Build reduce and probe from source
-
-If conda packages are unavailable or fail, build manually:
+Build manually:
 
 **Step 1: Build probe**
 
