@@ -6,22 +6,22 @@ This repository provides a reproducible pipeline for validating generated protei
 
 - `validate.py` - validation script (CCTBX Ramachandran + optional MolProbity clashscore)
 - `results.csv` - per-structure quality metrics (Ramachandran + clashscore)
-- `generated_pdbs/` - precomputed input structures (length ~200 backbones)
-- `reduced_pdbs/` - hydrogen-preprocessed structures (when clashscore succeeds)
+- `analysis.pdf` - one-page summary with figures and statistics table
+- `generated_pdbs/` - precomputed input structures (100 backbones at length ~200)
 
-**Note:** Structure generation (La-Proteina and ReQFlow) was performed separately. This repository focuses on validation using the generated PDB files.
+The repository also includes the source code and checkpoints (in separate `la-proteina/` and `ReQFlow/` directories) used to generate the structures via unconditional sampling.
 
 ## Repository Structure
 
-- `validate.py` - thin wrapper that forwards to `submission/validate.py`
-- `submission/` - validation script, CSV output, analysis PDF, and submission notes
-- `generated_pdbs/` - final generated structures grouped by method
-- `reduced_pdbs/` - hydrogen-added structures saved during clashscore preprocessing
-- `la-proteina/` - La-Proteina source tree and checkpoints
-- `ReQFlow/` - ReQFlow source tree and checkpoint files
-- `environment.yml` - conda environment for Linux/HPC (CCTBX + validation stack with reduce and probe)
-- `environment-macos.yml` - conda environment for macOS (CCTBX + validation stack; reduce/probe must be built manually if not available)
-- `setup_notes.md` - setup and generation notes
+- `validate.py` - validation script (CCTBX Ramachandran + optional MolProbity clashscore)
+- `results.csv` - validation output for all 100 structures
+- `analysis.pdf` - one-page summary with Ramachandran figures and statistics
+- `generated_pdbs/` - 100 final structures (50 La-Proteina + 50 ReQFlow)
+- `reduced_pdbs/` - hydrogen-added structures from clashscore preprocessing
+- `la-proteina/` - La-Proteina source repository
+- `ReQFlow/` - ReQFlow source repository
+- `environment.yml` - conda environment for Linux/HPC
+- `environment-macos.yml` - conda environment for macOS
 
 ## Environment Setup
 
@@ -118,6 +118,34 @@ Each set contains approximately 200-residue backbones with filenames:
 - `reqflow_001.pdb` through `reqflow_050.pdb`
 
 (Note: Structures are parsed as 198 residues by CCTBX. This reflects terminal residue handling in the PDB representation rather than a true change in backbone length.)
+
+## Structure Generation (Commands Used)
+
+The following commands were used to generate the 100 input structures:
+
+### La-Proteina (50 structures)
+
+Repository: `la-proteina/` (commit `cde5de3ead6e4d76f367da6dc5174be9913ef6ca`)
+
+```bash
+cd la-proteina
+python proteinfoundation/generate.py --config_name inference_ucond_notri
+```
+
+Configuration: Unconditional sampling, length 200, 50 samples.  
+Checkpoints: Placed in `./checkpoints_laproteina/` (not included in repo; see `./checkpoints_laproteina/instructions.txt`).
+
+### ReQFlow (50 structures)
+
+Repository: `ReQFlow/` (commit `2c93df98b655bc39848b50ad8e5b5138feee6878`)
+
+```bash
+cd ReQFlow
+python -W ignore experiments/inference_se3_flows.py -cn inference_unconditional
+```
+
+Configuration: Edit `configs/inference_unconditional.yaml` to set sample lengths to 200 and `samples_per_length: 50`.  
+Checkpoints: Expected under `ReQFlow/ckpts/` (not included in repo).
 
 ## Running Validation
 
@@ -260,7 +288,7 @@ The input directory is expected to contain 100 PDB files, 50 per method.
 
 The workflow is reproducible from:
 - Checked-in PDB structures in `generated_pdbs/`
-- Validation script `submission/validate.py` with CCTBX API calls
+- Validation script `validate.py` with CCTBX API calls
 - Platform-appropriate environment specification
 
 ## Assignment Alignment
