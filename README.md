@@ -211,7 +211,7 @@ If clashscore preprocessing succeeds, reduced structures are written to:
 
 ## Results Summary
 
-All 100 structures validated successfully on Linux/HPC with full clashscore metrics.
+All 100 structures validated successfully on Linux/HPC. Ramachandran analysis and clashscore were computed for the main run (see `results.csv`).
 
 Key summary:
 
@@ -220,16 +220,18 @@ Key summary:
 - All structures analyzed as 198 residues (parsed length from PDB format)
 - 0 validation failures
 - Ramachandran analysis: 100/100 successful
-- Clashscore (bonus summary shown below): unavailable (`NA`) for both methods in this run
+- Clashscore: computed for the main run (mean values shown below)
 
-Method-level Ramachandran summary:
+Method-level Ramachandran summary (main run):
 
 | Method | Mean Rama Favored | Median Rama Favored | Mean Rama Outlier | Median Rama Outlier | Mean Clashscore | N Successful |
-| --- | --- | --- | --- | --- | --- | --- |
-| La-Proteina | 0.9944 | 0.9949 | 0.0002 | 0.0000 | NA | 50 |
-| ReQFlow | 0.9781 | 0.9798 | 0.0046 | 0.0051 | NA | 50 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| La-Proteina | 0.9944 | 0.9949 | 0.0002 | 0.0000 | 0.00 | 50 |
+| ReQFlow | 0.9781 | 0.9798 | 0.0046 | 0.0051 | 0.00 | 50 |
 
-La-Proteina shows higher-quality Ramachandran metrics in this sample compared to ReQFlow, with ~2% higher favored fraction and ~0.5% lower outlier fraction. Both methods produce largely physically plausible backbones (>97% favored on average), but ReQFlow shows more variability and more outliers.
+La-Proteina shows slightly higher-quality Ramachandran metrics in this sample compared to ReQFlow, with a higher mean favored fraction and lower mean outlier fraction. Both methods produce largely physically plausible backbones (>97% favored on average), though ReQFlow exhibits greater variability.
+
+For bonus analyses (alternate runs, skip-clashscore, or additional summaries), see `bonus/summary_by_method.csv` and `bonus/README.md`.
 
 ## Known Issues & Quirks
 
