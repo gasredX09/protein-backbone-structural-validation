@@ -125,10 +125,10 @@ def _infer_method(pdb_path):
     return "unknown"
 
 
-def _find_pdb_files(input_dir, recursive=False):
+def _find_pdb_files(input_dir, recursive=True):
     input_path = Path(input_dir)
-    # Recursive search is optional here because the bonus workflow can also
-    # be pointed at a flat directory of PDBs.
+    # By default search recursively to match core validate.py behavior.
+    # This finds PDBs in subdirectories like generated_pdbs/laproteina/ and generated_pdbs/reqflow/.
     if recursive:
         pdb_iter = input_path.rglob("*.pdb")
     else:
@@ -230,10 +230,12 @@ def validate_pdb(pdb_path, skip_clashscore=False, reduced_root=None, log_file=No
         "filename": os.path.basename(pdb_path),
         "method": _infer_method(pdb_path),  # Needed for method-level summaries
         "n_residues": None,
-        # Per assignment schema: rama_* store fractions directly
         "rama_favored": None,
         "rama_allowed": None,
         "rama_outlier": None,
+        "rama_favored_frac": None,
+        "rama_allowed_frac": None,
+        "rama_outlier_frac": None,
         "clashscore": "NA",
         "n_clashes": "NA",
         "clashscore_error": "",
@@ -277,15 +279,21 @@ def validate_pdb(pdb_path, skip_clashscore=False, reduced_root=None, log_file=No
             result["clashscore_error"] = "skipped by --skip-clashscore"
 
         result["n_residues"] = rama.n_total
-        # Per assignment schema: store fractions directly in rama_* columns
+        # Store both counts and fractions for compatibility with generate_plots.py
         if rama.n_total:
-            result["rama_favored"] = round(rama.n_favored / rama.n_total, 4)
-            result["rama_allowed"] = round(rama.n_allowed / rama.n_total, 4)
-            result["rama_outlier"] = round(rama.n_outliers / rama.n_total, 4)
+            result["rama_favored"] = rama.n_favored
+            result["rama_allowed"] = rama.n_allowed
+            result["rama_outlier"] = rama.n_outliers
+            result["rama_favored_frac"] = round(rama.n_favored / rama.n_total, 4)
+            result["rama_allowed_frac"] = round(rama.n_allowed / rama.n_total, 4)
+            result["rama_outlier_frac"] = round(rama.n_outliers / rama.n_total, 4)
         else:
             result["rama_favored"] = None
             result["rama_allowed"] = None
             result["rama_outlier"] = None
+            result["rama_favored_frac"] = None
+            result["rama_allowed_frac"] = None
+            result["rama_outlier_frac"] = None
 
     except Exception as exc:
         result["error"] = str(exc)
@@ -349,10 +357,14 @@ def validate_directory(
 
     fieldnames = [
         "filename",
+        "method",
         "n_residues",
         "rama_favored",
         "rama_allowed",
         "rama_outlier",
+        "rama_favored_frac",
+        "rama_allowed_frac",
+        "rama_outlier_frac",
         "clashscore",
         "n_clashes",
         "clashscore_error",
@@ -362,9 +374,7 @@ def validate_directory(
     with open(output_csv, "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        # Only write fields that are in fieldnames (filters out 'method' which is for internal summaries)
-        filtered_results = [{k: v for k, v in r.items() if k in fieldnames} for r in results]
-        writer.writerows(filtered_results)
+        writer.writerows(results)
 
     if summary_out:
         _write_method_summary(results, summary_out)
@@ -393,9 +403,10 @@ def main():
         help="Output CSV path for per-method summary statistics",
     )
     parser.add_argument(
-        "--recursive",
-        action="store_true",
-        help="Recursively search input directory for PDB files",
+        "--flat-search",
+        action="store_false",
+        dest="recursive",
+        help="Search only top-level directory (default: recursive search)",
     )
     parser.add_argument(
         "--skip-clashscore",

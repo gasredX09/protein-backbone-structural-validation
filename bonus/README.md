@@ -15,7 +15,7 @@ A production-ready validator that extends the core `validate.py` with:
 - **Structured error logging**: Logs validation failures to `logs/validation_errors.txt` with timestamps and error context
 - **Flexible CLI options**:
   - `--skip-clashscore`: Disable clashscore computation entirely
-  - `--recursive`: Search subdirectories for PDB files
+  - `--flat-search`: Search only top-level directory (recursive is default)
   - `--reduced-dir`: Customize output directory for hydrogen-added structures
   - `--log-file`: Customize error log location
 
@@ -28,8 +28,8 @@ python bonus/validate_bonus.py generated_pdbs --out bonus/results.csv
 # Ramachandran-only (no clashscore preprocessing)
 python bonus/validate_bonus.py generated_pdbs --out bonus/results.csv --skip-clashscore
 
-# Recursive search with verbose output
-python bonus/validate_bonus.py . --out bonus/results.csv --recursive -v
+# Search from current directory with verbose output (recursive by default)
+python bonus/validate_bonus.py . --out bonus/results.csv -v
 ```
 
 ### 2. Automatic Per-Method Summary Statistics
@@ -143,7 +143,7 @@ bonus/
 | Clashscore | Optional | Automatic with graceful fallback |
 | Error logging | None | Structured, timestamped |
 | Per-method summary | None | ✓ Automatic |
-| Recursive search | None | ✓ `--recursive` |
+| Recursive search | ✓ Default | ✓ Default (use `--flat-search` to disable) |
 | Skip clashscore | None | ✓ `--skip-clashscore` |
 | Plot generation | None | ✓ Separate script |
 
