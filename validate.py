@@ -26,6 +26,19 @@ REDUCE_BIN = shutil.which("reduce")
 PROBE_BIN = shutil.which("probe")
 
 
+def _prepare_pdb_input(input_path, work_dir):
+    """Return a PDB file path for downstream tools that require PDB input."""
+    suffix = Path(input_path).suffix.lower()
+    if suffix not in (".cif", ".mmcif"):
+        return input_path
+
+    converted_path = os.path.join(work_dir, Path(input_path).stem + ".pdb")
+    pdb_input = pdb.input(file_name=input_path)
+    hierarchy = pdb_input.construct_hierarchy()
+    hierarchy.write_pdb_file(file_name=converted_path)
+    return converted_path
+
+
 def _count_atoms(pdb_path):
     atom_count = 0
     with open(pdb_path, "r") as handle:
@@ -139,8 +152,9 @@ def validate_pdb(pdb_path):
             reduced_output_dir.mkdir(parents=True, exist_ok=True)
         
         with tempfile.TemporaryDirectory(prefix="validate_") as work_dir:
-            reduced_path, reduce_error = _run_reduce_pipeline(pdb_path, work_dir)
-            rama_input = reduced_path if reduced_path is not None else pdb_path
+            analysis_input = _prepare_pdb_input(pdb_path, work_dir)
+            reduced_path, reduce_error = _run_reduce_pipeline(analysis_input, work_dir)
+            rama_input = reduced_path if reduced_path is not None else analysis_input
 
             pdb_input = pdb.input(file_name=rama_input)
             hierarchy = pdb_input.construct_hierarchy()

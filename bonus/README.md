@@ -11,6 +11,7 @@ This directory contains optional enhancements to the core validation pipeline. T
 A production-ready validator that extends the core `validate.py` with:
 
 - **Ramachandran-only default**: Always computes CCTBX-based Ramachandran metrics
+- **PDB/mmCIF input support**: Reads `.pdb`, `.cif`, or `.mmcif` inputs and converts CIF/mmCIF to a temporary PDB before reduce/probe
 - **Automatic clashscore attempt**: Tries reduce + probe when available, gracefully falls back to NA when unavailable
 - **Structured error logging**: Logs validation failures to `logs/validation_errors.txt` with timestamps and error context
 - **Flexible CLI options**:
