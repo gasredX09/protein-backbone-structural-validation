@@ -98,18 +98,18 @@ Here's how to use all bonus features together:
 # Step 1: Run enhanced validation with automatic summary
 python bonus/validate_bonus.py generated_pdbs \
   --out bonus/results.csv \
-  --summary-out bonus/summary.csv \
+  --summary-out bonus/summary_by_method.csv \
   -v
 
 # Step 2: Generate plots from results
 python bonus/generate_plots.py \
   --results bonus/results.csv \
-  --summary bonus/summary.csv \
+  --summary bonus/summary_by_method.csv \
   --output-dir bonus/plots
 
 # Now you have:
 # - bonus/results.csv (per-structure metrics)
-# - bonus/summary.csv (per-method aggregate stats)
+# - bonus/summary_by_method.csv (per-method aggregate stats)
 # - bonus/logs/validation_errors.txt (error log)
 # - bonus/plots/*.png (publication-ready figures)
 # - bonus/reduced_pdbs/ (hydrogen-preprocessed structures from clashscore)
@@ -123,7 +123,7 @@ After running the bonus validator and plot generator, you'll have:
 bonus/
 ├── validate_bonus.py              # Main enhanced validator script
 ├── generate_plots.py              # Plot generation script
-├── results_bonus.csv              # Per-structure validation metrics (100 rows)
+├── results.csv                    # Per-structure validation metrics (100 rows)
 ├── summary_by_method.csv          # Per-method summary statistics
 ├── logs/
 │   └── validation_errors.txt      # Structured error log (timestamped)

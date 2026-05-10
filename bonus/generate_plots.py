@@ -7,7 +7,7 @@ Generates publication-quality figures from results CSV:
 - Summary statistics table
 
 Usage:
-    python bonus/generate_plots.py --results bonus/results_bonus.csv --summary bonus/summary_by_method.csv
+    python bonus/generate_plots.py --results bonus/results.csv --summary bonus/summary_by_method.csv
 """
 
 import argparse
@@ -136,17 +136,15 @@ def generate_plots(results_csv, summary_csv, output_dir="bonus/plots"):
                 f"{row['median_rama_favored']:.4f}",
                 f"{row['mean_rama_outlier']:.6f}",
                 f"{row['median_rama_outlier']:.6f}",
-                f"{int(row['n_successful'])}/{int(row['n_total'])}",
             ]
         )
 
     columns = [
         "Method",
-        "Mean Favored",
-        "Median Favored",
-        "Mean Outlier",
-        "Median Outlier",
-        "Successful",
+        "Mean Favored Fraction",
+        "Median Favored Fraction",
+        "Mean Outlier Fraction",
+        "Median Outlier Fraction",
     ]
 
     table = ax.table(
@@ -154,7 +152,7 @@ def generate_plots(results_csv, summary_csv, output_dir="bonus/plots"):
         colLabels=columns,
         cellLoc="center",
         loc="center",
-        colWidths=[0.15, 0.15, 0.15, 0.15, 0.15, 0.15],
+        colWidths=[0.18, 0.2, 0.2, 0.2, 0.2],
     )
     table.auto_set_font_size(False)
     table.set_fontsize(10)
@@ -188,7 +186,7 @@ def main():
     )
     parser.add_argument(
         "--results",
-        default="bonus/results_bonus.csv",
+        default="bonus/results.csv",
         help="Path to results CSV from bonus validator",
     )
     parser.add_argument(
