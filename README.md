@@ -167,7 +167,7 @@ python validate.py generated_pdbs --out results.csv -v
 Validation performs the following steps for each structure:
 
 1. **Parse structure:** Read PDB file with CCTBX
-2. **Ramachandran analysis:** Compute favored/allowed/outlier counts and fractions using CCTBX phi/psi geometry
+2. **Ramachandran analysis:** Compute favored/allowed/outlier fractions using CCTBX phi/psi geometry
 3. **Optional clashscore (if reduce + probe available):**
    - Clashscore requires explicit hydrogen placement; `reduce` adds hydrogens and optimizes orientations (for example Asn/Gln/His flips), while `probe` computes steric overlaps.
    - Strip hydrogens: `reduce -quiet -trim -allalt input.pdb > trimmed.pdb`
@@ -182,18 +182,16 @@ The validation script logs errors per structure and continues execution, so a si
 `results.csv` contains the following columns:
 
 - `filename` - input PDB filename
-- `method` - `laproteina` or `reqflow`
 - `n_residues` - residues analyzed by CCTBX
-- `rama_favored` - favored Ramachandran residue count
-- `rama_allowed` - allowed Ramachandran residue count
-- `rama_outlier` - outlier Ramachandran residue count
-- `rama_favored_frac` - favored fraction
-- `rama_allowed_frac` - allowed fraction
-- `rama_outlier_frac` - outlier fraction
+- `rama_favored` - fraction of residues in the Ramachandran favored region
+- `rama_allowed` - fraction of residues in the Ramachandran allowed region
+- `rama_outlier` - fraction of residues in the Ramachandran outlier region
 - `clashscore` - clashscore value, or `NA` if unavailable
 - `n_clashes` - clash count used for clashscore, or `NA`
 - `clashscore_error` - reason clashscore was unavailable, if any
 - `error` - validation error, if any
+
+The optional bonus output `bonus/results.csv` includes additional convenience columns, including `method` and both Ramachandran counts and fractions.
 
 If clashscore preprocessing succeeds, reduced structures are written to:
 
@@ -202,7 +200,7 @@ If clashscore preprocessing succeeds, reduced structures are written to:
 
 ## Results Summary
 
-All 100 structures validated successfully on Linux/HPC. Ramachandran analysis and clashscore were computed for the main run (see `results.csv`).
+All 100 structures validated successfully on Linux/HPC. Ramachandran analysis and the direct reduce/probe clashscore workflow were computed for the main run (see `results.csv`).
 
 Key summary:
 
@@ -211,7 +209,7 @@ Key summary:
 - All structures analyzed as 198 residues (parsed length from PDB format)
 - 0 validation failures
 - Ramachandran analysis: 100/100 successful
-- Clashscore: computed for the main run (mean values shown below)
+- Clashscore: computed for the main run with direct `reduce` + `probe` preprocessing (mean values shown below)
 
 Method-level Ramachandran summary (main run):
 
@@ -222,7 +220,7 @@ Method-level Ramachandran summary (main run):
 
 La-Proteina shows slightly higher-quality Ramachandran metrics in this sample compared to ReQFlow, with a higher mean favored fraction and lower mean outlier fraction. Both methods produce largely physically plausible backbones (>97% favored on average), though ReQFlow exhibits greater variability.
 
-For bonus analyses (alternate runs, skip-clashscore, or additional summaries), see `bonus/summary_by_method.csv` and `bonus/README.md`.
+For bonus analyses (alternate runs, skip-clashscore, or additional summaries), see `bonus/results.csv`, `bonus/summary_by_method.csv`, and `bonus/README.md`.
 
 ## Known Issues & Quirks
 
@@ -295,4 +293,3 @@ The workflow is reproducible from:
 - Checked-in PDB structures in `generated_pdbs/`
 - Validation script `validate.py` with CCTBX API calls
 - Platform-appropriate environment specification
-

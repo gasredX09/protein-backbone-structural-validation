@@ -19,16 +19,40 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
+.ipynb_checkpoints/
+*.code-workspace
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Local environments and caches
+.venv/
+venv/
+env/
+conda_envs/
+.cache/
+
+# Runtime/log artifacts
+*.log
+*.out
+*.err
+*.tmp
+*.bak
+*.zip
+*.tar
+*.tar.gz
 
 # Project-specific
 submission/
@@ -39,4 +63,4 @@ slurm/
 logs/
 *.csv.bak
 test_*.csv
-=*.py
+=*

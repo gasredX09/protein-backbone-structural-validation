@@ -7,7 +7,7 @@ Generates publication-quality figures from results CSV:
 - Summary statistics table
 
 Usage:
-    python bonus/generate_plots.py --results bonus/results_bonus.csv --summary bonus/summary_by_method.csv
+    python bonus/generate_plots.py --results bonus/results.csv --summary bonus/summary_by_method.csv
 """
 
 import argparse
@@ -186,7 +186,7 @@ def main():
     )
     parser.add_argument(
         "--results",
-        default="bonus/results_bonus.csv",
+        default="bonus/results.csv",
         help="Path to results CSV from bonus validator",
     )
     parser.add_argument(
