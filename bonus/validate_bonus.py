@@ -200,9 +200,9 @@ def _write_method_summary(results, summary_out):
         for method in sorted(by_method):
             rows = by_method[method]
             successful = [r for r in rows if not r.get("error")]
-            # rama_* now store fractions directly (per new schema)
-            favored_vals = [_to_float(r.get("rama_favored")) for r in successful]
-            outlier_vals = [_to_float(r.get("rama_outlier")) for r in successful]
+            # Read from _frac columns which store fractions (0-1 range)
+            favored_vals = [_to_float(r.get("rama_favored_frac")) for r in successful]
+            outlier_vals = [_to_float(r.get("rama_outlier_frac")) for r in successful]
             clash_vals = [_to_float(r.get("clashscore")) for r in successful]
 
             favored_vals = [v for v in favored_vals if v is not None]
